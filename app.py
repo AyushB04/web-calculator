@@ -30,14 +30,12 @@ calc = AdvancedCalculator()
 
 @app.route("/")
 def home():
-    return "Calculator API is running 🚀"
+    return render_template("index.html")
 
 @app.route("/calculate", methods=["POST"])
 def calculate():
-    data = request.json
-    expr = data.get("expression")
-
     try:
+        expr = request.json["expression"]
         result = calc.evaluate(expr)
         return jsonify(result=result)
     except Exception as e:
