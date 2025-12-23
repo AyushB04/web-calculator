@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Web Calculator</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .calculator {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .result {
+            margin-top: 15px;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .hint {
+            font-size: 13px;
+            color: gray;
+            margin-top: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="calculator">
+        <h2>Advanced Calculator</h2>
+
+        <input id="expression" placeholder="Example: sqrt(25) + sin(pi/2)" />
+
+        <button onclick="calculate()">Calculate</button>
+
+        <div class="result" id="result"></div>
+
+        <div class="hint">
+            Supports: + − × ÷, sqrt, sin, cos, tan, log, factorial, pi
+        </div>
+    </div>
+
+    <script>
+        function calculate() {
+            const expr = document.getElementById("expression").value;
+            const resultBox = document.getElementById("result");
+
+            resultBox.innerText = "Calculating...";
+
+            fetch("/calculate", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ expression: expr })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.result !== undefined) {
+                    resultBox.innerText = "Result: " + data.result;
+                } else {
+                    resultBox.innerText = "Error: " + data.error;
+                }
+            })
+            .catch(() => {
+                resultBox.innerText = "Server error";
+            });
+        }
+    </script>
+</body>
+</html>
