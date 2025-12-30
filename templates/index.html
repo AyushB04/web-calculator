@@ -1,115 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Web Calculator</title>
+    <meta charset="UTF-8">
+    <title>Casio Calculator</title>
 
     <style>
         body {
+            background: #f2f2f2;
             font-family: Arial, sans-serif;
-            background: #f2f4f8;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
         }
 
         .calculator {
-            background: white;
+            background: #222;
             padding: 20px;
-            border-radius: 10px;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            width: 320px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
         }
 
-        h2 {
-            text-align: center;
+        .display {
+            background: #dfe6e9;
+            height: 60px;
+            border-radius: 8px;
             margin-bottom: 15px;
+            padding: 10px;
+            font-size: 22px;
+            text-align: right;
+            overflow-x: auto;
         }
 
-        input {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            margin-bottom: 10px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
+        .keys {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
         }
 
         button {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            background: #007bff;
-            color: white;
+            padding: 15px;
+            font-size: 18px;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
+            background: #636e72;
+            color: white;
+        }
+
+        button.operator {
+            background: #fdcb6e;
+            color: black;
+        }
+
+        button.equal {
+            background: #00b894;
+            grid-column: span 2;
+        }
+
+        button.clear {
+            background: #d63031;
+            grid-column: span 2;
         }
 
         button:hover {
-            background: #0056b3;
-        }
-
-        .result {
-            margin-top: 15px;
-            font-size: 18px;
-            text-align: center;
-        }
-
-        .hint {
-            font-size: 13px;
-            color: gray;
-            margin-top: 10px;
-            text-align: center;
+            opacity: 0.85;
         }
     </style>
 </head>
 
 <body>
-    <div class="calculator">
-        <h2>Advanced Calculator</h2>
 
-        <input id="expression" placeholder="Example: sqrt(25) + sin(pi/2)" />
+<div class="calculator">
+    <div id="display" class="display">0</div>
 
-        <button onclick="calculate()">Calculate</button>
+    <div class="keys">
+        <button class="clear" onclick="clearDisplay()">C</button>
+        <button class="operator" onclick="append('/')">÷</button>
 
-        <div class="result" id="result"></div>
+        <button onclick="append('7')">7</button>
+        <button onclick="append('8')">8</button>
+        <button onclick="append('9')">9</button>
+        <button class="operator" onclick="append('*')">×</button>
 
-        <div class="hint">
-            Supports: + − × ÷, sqrt, sin, cos, tan, log, factorial, pi
-        </div>
+        <button onclick="append('4')">4</button>
+        <button onclick="append('5')">5</button>
+        <button onclick="append('6')">6</button>
+        <button class="operator" onclick="append('-')">−</button>
+
+        <button onclick="append('1')">1</button>
+        <button onclick="append('2')">2</button>
+        <button onclick="append('3')">3</button>
+        <button class="operator" onclick="append('+')">+</button>
+
+        <button onclick="append('0')">0</button>
+        <button onclick="append('.')">.</button>
+        <button class="equal" onclick="calculate()">=</button>
     </div>
+</div>
 
-    <script>
-        function calculate() {
-            const expr = document.getElementById("expression").value;
-            const resultBox = document.getElementById("result");
+<script>
+    let expression = "";
 
-            resultBox.innerText = "Calculating...";
+    function append(value) {
+        if (expression === "0") expression = "";
+        expression += value;
+        document.getElementById("display").innerText = expression;
+    }
 
-            fetch("/calculate", {
+    function clearDisplay() {
+        expression = "";
+        document.getElementById("display").innerText = "0";
+    }
+
+    async function calculate() {
+        try {
+            const response = await fetch("/calculate", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ expression: expr })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.result !== undefined) {
-                    resultBox.innerText = "Result: " + data.result;
-                } else {
-                    resultBox.innerText = "Error: " + data.error;
-                }
-            })
-            .catch(() => {
-                resultBox.innerText = "Server error";
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ expression: expression })
             });
+
+            const data = await response.json();
+            expression = data.result.toString();
+            document.getElementById("display").innerText = expression;
+        } catch (error) {
+            document.getElementById("display").innerText = "Error";
+            expression = "";
         }
-    </script>
+    }
+</script>
+
 </body>
 </html>
